@@ -1,8 +1,11 @@
 export const DEMO_HTML = `<!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ADDL Demo Launcher</title>
+    <title>ADDL - Agent-Driven Dynamic Launcher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -10,311 +13,603 @@ export const DEMO_HTML = `<!DOCTYPE html>
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
         }
-        .top-bar {
-            background: rgba(0,0,0,0.3);
-            padding: 15px 20px;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .top-nav {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            padding: 18px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            z-index: 10;
         }
-        .top-bar h1 {
-            color: white;
-            font-size: 20px;
-            font-weight: 600;
-        }
-        .intent-input-container {
+        .logo-section {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 14px;
+        }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+        .logo-sub {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+        }
+        .center-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
             flex: 1;
-            max-width: 600px;
-            margin: 0 30px;
+            max-width: 700px;
+            margin: 0 40px;
+        }
+        .intent-input-wrapper {
+            flex: 1;
+            position: relative;
         }
         .intent-input {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
+            width: 100%;
+            padding: 14px 24px 14px 52px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.03);
             outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Inter', sans-serif;
         }
-        .intent-button {
-            padding: 12px 25px;
+        .intent-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+        }
+        .intent-input:focus {
+            border-color: rgba(102, 126, 234, 0.6);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+        }
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .generate-btn {
+            padding: 14px 28px;
             border: none;
-            border-radius: 25px;
-            background: #FF6B6B;
-            color: white;
-            font-size: 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .intent-button:hover {
-            background: #ff5252;
-            transform: scale(1.05);
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
         }
-        .ai-toggle {
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        .right-section {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            transition: 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 2px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        .desktop-area {
+            flex: 1;
+            padding: 40px;
+            position: relative;
+            z-index: 5;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .expiry-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 14px 22px;
             display: flex;
             align-items: center;
             gap: 10px;
-            color: white;
-            font-size: 14px;
         }
-        .ai-toggle input {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
+        .expiry-icon {
+            font-size: 18px;
         }
-        .launcher-area {
-            flex: 1;
-            padding: 30px;
+        .expiry-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .layout-badge {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #a5b4fc;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .clusters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .cluster-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 28px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .cluster-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.6), transparent);
+        }
+        .cluster-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .cluster-header {
             display: flex;
-            flex-direction: column;
-            gap: 30px;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
         }
-        .clusters-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .cluster {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 20px;
-            min-width: 280px;
-            border: 1px solid rgba(255,255,255,0.2);
+        .cluster-emoji {
+            font-size: 24px;
         }
         .cluster-title {
-            color: white;
             font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(255,255,255,0.3);
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
         }
         .icons-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 16px;
         }
-        .icon-card {
-            background: rgba(255,255,255,0.95);
-            border-radius: 15px;
-            padding: 20px 10px;
+        .icon-item {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 20px 12px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .icon-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        .icon-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-4px) scale(1.02);
+            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
         }
-        .icon-card img {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 10px;
+        .icon-item img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
         }
         .icon-label {
             font-size: 13px;
             font-weight: 600;
-            color: #333;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.3;
         }
         .icon-type {
             font-size: 11px;
-            color: #666;
-            margin-top: 5px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.45);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .pins-area {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
+        .pinned-section {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 32px;
         }
-        .pins-title {
-            color: white;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
+        .pinned-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 28px;
+        }
+        .pinned-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         .add-pin-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            color: white;
-            font-size: 14px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 10px 20px;
+            border-radius: 12px;
+            color: #a5b4fc;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
         }
         .add-pin-btn:hover {
-            background: rgba(255,255,255,0.3);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            transform: translateY(-2px);
         }
-        .pins-grid {
+        .pinned-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 16px;
         }
-        .pin-card {
-            background: rgba(255,255,255,0.95);
-            border-radius: 15px;
-            padding: 15px 12px;
+        .pinned-item {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 18px 14px;
             text-align: center;
             cursor: pointer;
-            min-width: 100px;
+            min-width: 110px;
             transition: all 0.3s;
             position: relative;
         }
-        .pin-card:hover {
+        .pinned-item:hover {
+            background: rgba(255, 255, 255, 0.1);
             transform: translateY(-3px);
+            border-color: rgba(102, 126, 234, 0.3);
         }
-        .pin-card img {
+        .pinned-item img {
             width: 40px;
             height: 40px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
-        .pin-label {
+        .pinned-label {
             font-size: 12px;
             font-weight: 600;
-            color: #333;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.3;
         }
         .delete-pin {
             position: absolute;
-            top: 5px;
-            right: 8px;
-            background: #ff4444;
+            top: 8px;
+            right: 10px;
+            background: rgba(239, 68, 68, 0.9);
             color: white;
             border: none;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
-            font-size: 12px;
+            font-size: 13px;
             cursor: pointer;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .pin-card:hover .delete-pin {
+        .pinned-item:hover .delete-pin {
             opacity: 1;
         }
-        .expiry-info {
-            color: white;
+        .empty-state {
+            color: rgba(255, 255, 255, 0.45);
             font-size: 14px;
-            background: rgba(0,0,0,0.2);
-            padding: 10px 20px;
-            border-radius: 10px;
-            display: inline-block;
+            font-weight: 500;
         }
-        .modal {
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            padding: 24px;
         }
-        .modal.show {
+        .modal-overlay.show {
             display: flex;
         }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            width: 400px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        .modal-container {
+            background: rgba(20, 20, 35, 0.95);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
+            animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         .modal-title {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 28px;
+            letter-spacing: -0.5px;
+        }
+        .modal-field {
             margin-bottom: 20px;
-            color: #333;
+        }
+        .modal-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .modal-input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 14px 18px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.03);
             outline: none;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+        .modal-input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+            font-weight: 400;
         }
         .modal-input:focus {
-            border-color: #667eea;
+            border-color: rgba(102, 126, 234, 0.6);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
         }
-        .modal-buttons {
+        .modal-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 32px;
             justify-content: flex-end;
         }
         .modal-btn {
-            padding: 12px 25px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
         }
-        .modal-btn.cancel {
-            background: #ddd;
-            color: #333;
+        .modal-btn-cancel {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
         }
-        .modal-btn.save {
-            background: #667eea;
+        .modal-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .modal-btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+        .modal-btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
         }
     </style>
 </head>
 <body>
-    <div class="top-bar">
-        <h1>🚀 ADDL Demo Launcher</h1>
-        <div class="intent-input-container">
-            <input type="text" id="intentInput" class="intent-input" placeholder="무엇을 도와드릴까요? (예: 내일 부산 출장 가)">
-            <button class="intent-button" onclick="handleIntent()">✨ 생성하기</button>
-        </div>
-        <label class="ai-toggle">
-            <input type="checkbox" id="useAi">
-            <span>AI 사용</span>
-        </label>
-    </div>
-
-    <div class="launcher-area">
-        <div id="expiryInfo" class="expiry-info" style="display: none;"></div>
-        
-        <div id="clustersContainer" class="clusters-container"></div>
-
-        <div class="pins-area">
-            <div class="pins-title">
-                📌 고정된 아이템
-                <button class="add-pin-btn" onclick="openPinModal()">+ Pin 추가</button>
+    <nav class="top-nav">
+        <div class="logo-section">
+            <div class="logo-icon">🚀</div>
+            <div>
+                <div class="logo-text">ADDL</div>
+                <div class="logo-sub">Agent-Driven Launcher</div>
             </div>
-            <div id="pinsGrid" class="pins-grid"></div>
         </div>
-    </div>
+        <div class="center-section">
+            <div class="intent-input-wrapper">
+                <span class="input-icon">✨</span>
+                <input type="text" id="intentInput" class="intent-input" placeholder="What can I help you with? (e.g., I need to go to Busan tomorrow)">
+            </div>
+            <button class="generate-btn" onclick="handleIntent()">
+                <span>Generate</span>
+                <span>→</span>
+            </button>
+        </div>
+        <div class="right-section">
+            <label class="mode-toggle">
+                <span class="toggle-label">AI Agent Mode</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="useAi">
+                    <span class="toggle-slider"></span>
+                </label>
+            </label>
+        </div>
+    </nav>
 
-    <div id="pinModal" class="modal">
-        <div class="modal-content">
-            <h2 class="modal-title">Pin 추가하기</h2>
-            <input type="text" id="pinLabel" class="modal-input" placeholder="레이블 (예: 중요 문서)">
-            <input type="text" id="pinIconUrl" class="modal-input" placeholder="아이콘 URL">
-            <input type="text" id="pinAction" class="modal-input" placeholder="액션 (URL)">
-            <div class="modal-buttons">
-                <button class="modal-btn cancel" onclick="closePinModal()">취소</button>
-                <button class="modal-btn save" onclick="savePin()">저장</button>
+    <main class="desktop-area">
+        <div class="status-bar">
+            <div id="expiryCard" class="expiry-card" style="display: none;">
+                <span class="expiry-icon">⏰</span>
+                <span id="expiryText" class="expiry-text"></span>
+            </div>
+            <div id="layoutBadge" class="layout-badge" style="display: none;"></div>
+        </div>
+
+        <div id="clustersGrid" class="clusters-grid"></div>
+
+        <section class="pinned-section">
+            <div class="pinned-header">
+                <div class="pinned-title">
+                    <span>📌</span>
+                    <span>Pinned Items</span>
+                </div>
+                <button class="add-pin-btn" onclick="openPinModal()">+ Add Pin</button>
+            </div>
+            <div id="pinnedGrid" class="pinned-grid"></div>
+        </section>
+    </main>
+
+    <div id="pinModal" class="modal-overlay">
+        <div class="modal-container">
+            <h2 class="modal-title">Add New Pin</h2>
+            
+            <div class="modal-field">
+                <label class="modal-label">Label</label>
+                <input type="text" id="pinLabel" class="modal-input" placeholder="e.g., Important Document">
+            </div>
+            
+            <div class="modal-field">
+                <label class="modal-label">Icon URL</label>
+                <input type="text" id="pinIconUrl" class="modal-input" placeholder="https://...">
+            </div>
+            
+            <div class="modal-field">
+                <label class="modal-label">Action URL</label>
+                <input type="text" id="pinAction" class="modal-input" placeholder="https://...">
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closePinModal()">Cancel</button>
+                <button class="modal-btn modal-btn-save" onclick="savePin()">Save</button>
             </div>
         </div>
     </div>
@@ -345,30 +640,46 @@ export const DEMO_HTML = `<!DOCTYPE html>
         function renderClusters(data) {
             currentIcons = data.icons;
             currentExpiry = data.expiry;
-            const container = document.getElementById('clustersContainer');
-            const expiryInfo = document.getElementById('expiryInfo');
+            const container = document.getElementById('clustersGrid');
+            const expiryCard = document.getElementById('expiryCard');
+            const expiryText = document.getElementById('expiryText');
+            const layoutBadge = document.getElementById('layoutBadge');
 
             if (data.expiry) {
                 const expiryDate = new Date(data.expiry);
-                expiryInfo.textContent = \`⏰ 유효시간: \${expiryDate.toLocaleString('ko-KR')}\`;
-                expiryInfo.style.display = 'inline-block';
+                expiryText.textContent = \`Expires: \${expiryDate.toLocaleString('en-US')}\`;
+                expiryCard.style.display = 'flex';
+            } else {
+                expiryCard.style.display = 'none';
+            }
+
+            if (data.layout_id) {
+                layoutBadge.textContent = data.layout_id;
+                layoutBadge.style.display = 'block';
+            } else {
+                layoutBadge.style.display = 'none';
             }
 
             container.innerHTML = '';
             if (data.clusters && data.clusters.length > 0) {
                 data.clusters.forEach(cluster => {
                     const clusterDiv = document.createElement('div');
-                    clusterDiv.className = 'cluster';
-                    clusterDiv.style.borderColor = cluster.color || 'rgba(255,255,255,0.2)';
+                    clusterDiv.className = 'cluster-card';
                     
-                    clusterDiv.innerHTML = \`<div class="cluster-title">📂 \${cluster.label}</div>\`;
+                    clusterDiv.innerHTML = \`
+                        <div class="cluster-header">
+                            <span class="cluster-emoji">📂</span>
+                            <div class="cluster-title">\${cluster.label}</div>
+                        </div>
+                    \`;
+                    
                     const iconsGrid = document.createElement('div');
                     iconsGrid.className = 'icons-grid';
                     
                     cluster.icon_ids.forEach(iconId => {
                         const icon = data.icons.find(i => i.id === iconId);
                         if (icon) {
-                            iconsGrid.appendChild(createIconCard(icon));
+                            iconsGrid.appendChild(createIconItem(icon));
                         }
                     });
                     clusterDiv.appendChild(iconsGrid);
@@ -376,33 +687,38 @@ export const DEMO_HTML = `<!DOCTYPE html>
                 });
             } else {
                 const clusterDiv = document.createElement('div');
-                clusterDiv.className = 'cluster';
-                clusterDiv.innerHTML = \`<div class="cluster-title">📱 추천 아이콘</div>\`;
+                clusterDiv.className = 'cluster-card';
+                clusterDiv.innerHTML = \`
+                    <div class="cluster-header">
+                        <span class="cluster-emoji">📱</span>
+                        <div class="cluster-title">Suggested Icons</div>
+                    </div>
+                \`;
                 const iconsGrid = document.createElement('div');
                 iconsGrid.className = 'icons-grid';
                 
                 data.icons.forEach(icon => {
-                    iconsGrid.appendChild(createIconCard(icon));
+                    iconsGrid.appendChild(createIconItem(icon));
                 });
                 clusterDiv.appendChild(iconsGrid);
                 container.appendChild(clusterDiv);
             }
         }
 
-        function createIconCard(icon) {
-            const card = document.createElement('div');
-            card.className = 'icon-card';
-            card.innerHTML = \`
+        function createIconItem(icon) {
+            const item = document.createElement('div');
+            item.className = 'icon-item';
+            item.innerHTML = \`
                 <img src="\${icon.icon_url}" alt="\${icon.label}" onerror="this.src='https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/questionmark.svg'">
                 <div class="icon-label">\${icon.label}</div>
                 <div class="icon-type">\${icon.type}</div>
             \`;
-            card.onclick = () => {
+            item.onclick = () => {
                 if (icon.action) {
                     window.open(icon.action, '_blank');
                 }
             };
-            return card;
+            return item;
         }
 
         async function loadPins() {
@@ -416,26 +732,26 @@ export const DEMO_HTML = `<!DOCTYPE html>
         }
 
         function renderPins(pins) {
-            const grid = document.getElementById('pinsGrid');
+            const grid = document.getElementById('pinnedGrid');
             grid.innerHTML = '';
             if (!pins || pins.length === 0) {
-                grid.innerHTML = '<div style="color: white; opacity: 0.7;">고정된 아이템이 없습니다</div>';
+                grid.innerHTML = '<div class="empty-state">No pinned items yet</div>';
                 return;
             }
             pins.forEach(pin => {
-                const card = document.createElement('div');
-                card.className = 'pin-card';
-                card.innerHTML = \`
+                const item = document.createElement('div');
+                item.className = 'pinned-item';
+                item.innerHTML = \`
                     <button class="delete-pin" onclick="deletePin('\${pin.id}')">×</button>
                     <img src="\${pin.icon_url}" alt="\${pin.label}" onerror="this.src='https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/questionmark.svg'">
-                    <div class="pin-label">\${pin.label}</div>
+                    <div class="pinned-label">\${pin.label}</div>
                 \`;
-                card.onclick = (e) => {
+                item.onclick = (e) => {
                     if (!e.target.classList.contains('delete-pin')) {
                         window.open(pin.action, '_blank');
                     }
                 };
-                grid.appendChild(card);
+                grid.appendChild(item);
             });
         }
 
@@ -456,7 +772,7 @@ export const DEMO_HTML = `<!DOCTYPE html>
             const action = document.getElementById('pinAction').value;
 
             if (!label || !icon_url || !action) {
-                alert('모든 필드를 입력해주세요');
+                alert('Please fill in all fields');
                 return;
             }
 
