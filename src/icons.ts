@@ -164,6 +164,119 @@ export const INTENT_TEMPLATES: IntentTemplate[] = [
         type: 'action'
       }
     ]
+  },
+  {
+    layout_id: 'study_001',
+    expiry_hours: 12,
+    keywords: ['학습', 'study', '공부', '시험'],
+    icons: [
+      {
+        id: 'notion_001',
+        label: '노트 정리',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/notion.svg',
+        action: 'https://www.notion.so',
+        type: 'action'
+      },
+      {
+        id: 'quizlet_001',
+        label: '플래시카드',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/quizlet.svg',
+        action: 'https://www.quizlet.com',
+        type: 'action'
+      },
+      {
+        id: 'timer_001',
+        label: '포모도로 타이머',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/clockify.svg',
+        action: 'https://clockify.me',
+        type: 'widget',
+        widget_data: {
+          type: 'timer',
+          update_interval: 1,
+          preview: '25:00'
+        }
+      }
+    ],
+    clusters: [
+      {
+        id: 'study_cluster_001',
+        label: '학습 도구',
+        icon_ids: ['notion_001', 'quizlet_001', 'timer_001'],
+        color: '#8B5CF6'
+      }
+    ]
+  },
+  {
+    layout_id: 'shopping_001',
+    expiry_hours: 6,
+    keywords: ['쇼핑', 'shopping', '구매', '물건'],
+    icons: [
+      {
+        id: 'coupang_002',
+        label: '쿠팡',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/coupang.svg',
+        action: 'https://www.coupang.com',
+        type: 'app'
+      },
+      {
+        id: 'amazon_001',
+        label: '아마존',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/amazon.svg',
+        action: 'https://www.amazon.com',
+        type: 'app'
+      },
+      {
+        id: 'cart_001',
+        label: '장바구니 확인',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/shoppingcart.svg',
+        action: 'https://www.coupang.com/cart',
+        type: 'action'
+      }
+    ],
+    clusters: [
+      {
+        id: 'shopping_cluster_001',
+        label: '쇼핑 앱',
+        icon_ids: ['coupang_002', 'amazon_001', 'cart_001'],
+        color: '#F59E0B'
+      }
+    ]
+  },
+  {
+    layout_id: 'gaming_001',
+    expiry_hours: 8,
+    keywords: ['게임', 'gaming', '플레이', 'game'],
+    icons: [
+      {
+        id: 'steam_001',
+        label: '스팀',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/steam.svg',
+        action: 'https://store.steampowered.com',
+        type: 'app'
+      },
+      {
+        id: 'discord_001',
+        label: '디스코드',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/discord.svg',
+        action: 'https://discord.com',
+        type: 'app'
+      },
+      {
+        id: 'twitch_001',
+        label: '트위치',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/twitch.svg',
+        action: 'https://www.twitch.tv',
+        type: 'app'
+      }
+    ],
+    clusters: [
+      {
+        id: 'gaming_cluster_001',
+        label: '게임 플랫폼',
+        icon_ids: ['steam_001', 'discord_001', 'twitch_001'],
+        color: '#EF4444'
+      }
+    ]
   }
 ]
 
@@ -190,19 +303,45 @@ export interface PinItem {
   created_at: string
 }
 
-let pinnedItems: PinItem[] = []
-
-export function getPinnedItems(): PinItem[] {
-  return [...pinnedItems]
+export interface KVStore {
+  get(key: string): Promise<string | null>
+  put(key: string, value: string): Promise<void>
+  delete(key: string): Promise<void>
+  list(): Promise<{ keys: { name: string }[] }>
 }
 
-export function addPinnedItem(item: PinItem): void {
-  pinnedItems.push(item)
+let inMemoryPinnedItems: PinItem[] = []
+
+export async function getPinnedItems(kv?: KVStore): Promise<PinItem[]> {
+  if (kv) {
+    const listResult = await kv.list()
+    const items: PinItem[] = []
+    for (const key of listResult.keys) {
+      const value = await kv.get(key.name)
+      if (value) {
+        items.push(JSON.parse(value))
+      }
+    }
+    return items.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+  }
+  return [...inMemoryPinnedItems]
 }
 
-export function removePinnedItem(id: string): boolean {
-  const initialLength = pinnedItems.length
-  pinnedItems = pinnedItems.filter(pin => pin.id !== id)
-  return pinnedItems.length !== initialLength
+export async function addPinnedItem(item: PinItem, kv?: KVStore): Promise<void> {
+  if (kv) {
+    await kv.put(`pin:${item.id}`, JSON.stringify(item))
+  } else {
+    inMemoryPinnedItems.push(item)
+  }
+}
+
+export async function removePinnedItem(id: string, kv?: KVStore): Promise<boolean> {
+  if (kv) {
+    await kv.delete(`pin:${id}`)
+    return true
+  }
+  const initialLength = inMemoryPinnedItems.length
+  inMemoryPinnedItems = inMemoryPinnedItems.filter(pin => pin.id !== id)
+  return inMemoryPinnedItems.length !== initialLength
 }
 

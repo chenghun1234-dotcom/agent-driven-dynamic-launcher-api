@@ -2,13 +2,9 @@ name = "agent-driven-dynamic-launcher-api"
 main = "src/index.ts"
 compatibility_date = "2026-05-06"
 
-# Uncomment the following line to enable usage of the R2 Bucket
-# [[r2_buckets]]
-# binding = "ICON_ASSETS"
-# bucket_name = "icon-assets"
-
-# Uncomment the following lines to enable D1 Database
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "addl-db"
-# database_id = "your-database-id"
+# Uncomment the following lines to enable KV Namespace
+# (Run 'wrangler kv:namespace create "ADDL_KV"' first to create the namespace)
+# [[kv_namespaces]]
+# binding = "ADDL_KV"
+# id = "your-kv-namespace-id"
+# preview_id = "your-kv-namespace-preview-id" (optional for local dev)

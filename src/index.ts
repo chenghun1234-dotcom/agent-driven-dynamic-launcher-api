@@ -3,8 +3,7 @@ import { cors } from 'hono/cors'
 import { INTENT_TEMPLATES, DEFAULT_TEMPLATE, IntentTemplate, PinItem, getPinnedItems, addPinnedItem, removePinnedItem } from './icons'
 
 type Bindings = {
-  // ICON_ASSETS: R2Bucket
-  // DB: D1Database
+  ADDL_KV?: KVNamespace
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -52,15 +51,16 @@ app.post('/v1/launcher/compose', async (c) => {
   })
 })
 
-app.get('/v1/launcher/pins', (c) => {
-  return c.json({
-    pins: getPinnedItems()
-  })
+app.get('/v1/launcher/pins', async (c) => {
+  const kv = c.env.ADDL_KV
+  const pins = await getPinnedItems(kv)
+  return c.json({ pins })
 })
 
 app.post('/v1/launcher/pin', async (c) => {
   const body = await c.req.json()
   const { label, icon_url, action } = body
+  const kv = c.env.ADDL_KV
 
   if (!label || !icon_url || !action) {
     return c.json({ error: 'Missing required fields: label, icon_url, action' }, 400)
@@ -74,15 +74,16 @@ app.post('/v1/launcher/pin', async (c) => {
     created_at: new Date().toISOString()
   }
 
-  addPinnedItem(newPin)
+  await addPinnedItem(newPin, kv)
   return c.json({ pin: newPin }, 201)
 })
 
-app.delete('/v1/launcher/pin/:id', (c) => {
+app.delete('/v1/launcher/pin/:id', async (c) => {
   const id = c.req.param('id')
-  const removed = removePinnedItem(id)
+  const kv = c.env.ADDL_KV
+  const removed = await removePinnedItem(id, kv)
 
-  if (!removed) {
+  if (!removed && !kv) {
     return c.json({ error: 'Pin not found' }, 404)
   }
 
