@@ -3,9 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2026-05-06"
 account_id = "8253b30c0106148cfe2add2a62792196"
 
-# Uncomment the following lines to enable KV Namespace
-# (Run 'wrangler kv:namespace create "ADDL_KV"' first to create the namespace)
-# [[kv_namespaces]]
-# binding = "ADDL_KV"
-# id = "your-kv-namespace-id"
-# preview_id = "your-kv-namespace-preview-id" (optional for local dev)
+# KV Namespace for persistent storage
+[[kv_namespaces]]
+binding = "ADDL_KV"
+id = "db1b20ed628348feab8d5eafd52059e8"
