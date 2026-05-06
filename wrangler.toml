@@ -1,6 +1,7 @@
 name = "agent-driven-dynamic-launcher-api"
 main = "src/index.ts"
 compatibility_date = "2026-05-06"
+account_id = "8253b30c0106148cfe2add2a62792196"
 
 # Uncomment the following lines to enable KV Namespace
 # (Run 'wrangler kv:namespace create "ADDL_KV"' first to create the namespace)
