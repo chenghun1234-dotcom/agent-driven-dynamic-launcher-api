@@ -7,3 +7,7 @@ account_id = "8253b30c0106148cfe2add2a62792196"
 [[kv_namespaces]]
 binding = "ADDL_KV"
 id = "db1b20ed628348feab8d5eafd52059e8"
+
+# Cloudflare Workers AI
+[ai]
+binding = "AI"
