@@ -1,0 +1,100 @@
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { INTENT_TEMPLATES, DEFAULT_TEMPLATE, IntentTemplate, PINNED_ITEMS, PinItem } from './icons'
+
+type Bindings = {
+  // ICON_ASSETS: R2Bucket
+  // DB: D1Database
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
+
+app.use('*', cors())
+
+app.get('/', (c) => {
+  return c.json({
+    name: 'Agent-Driven Dynamic Launcher (ADDL) UI API',
+    version: '1.0.0',
+    endpoints: [
+      'POST /v1/launcher/compose',
+      'GET /v1/launcher/pins',
+      'POST /v1/launcher/pin',
+      'DELETE /v1/launcher/pin/:id',
+      'GET /v1/assets/icons'
+    ]
+  })
+})
+
+function findMatchingTemplate(user_intent: string): IntentTemplate {
+  for (const template of INTENT_TEMPLATES) {
+    for (const keyword of template.keywords) {
+      if (user_intent.toLowerCase().includes(keyword.toLowerCase())) {
+        return template
+      }
+    }
+  }
+  return DEFAULT_TEMPLATE
+}
+
+app.post('/v1/launcher/compose', async (c) => {
+  const body = await c.req.json()
+  const { user_intent } = body
+
+  const template = findMatchingTemplate(user_intent || '')
+  const expiryHours = template.expiry_hours || 24
+  const expiry = new Date(Date.now() + expiryHours * 60 * 60 * 1000).toISOString()
+
+  return c.json({
+    layout_id: template.layout_id,
+    icons: template.icons,
+    clusters: template.clusters || [],
+    expiry
+  })
+})
+
+app.get('/v1/launcher/pins', (c) => {
+  return c.json({
+    pins: PINNED_ITEMS
+  })
+})
+
+app.post('/v1/launcher/pin', async (c) => {
+  const body = await c.req.json()
+  const { label, icon_url, action } = body
+
+  if (!label || !icon_url || !action) {
+    return c.json({ error: 'Missing required fields: label, icon_url, action' }, 400)
+  }
+
+  const newPin: PinItem = {
+    id: Date.now().toString(),
+    label,
+    icon_url,
+    action,
+    created_at: new Date().toISOString()
+  }
+
+  PINNED_ITEMS.push(newPin)
+  return c.json({ pin: newPin }, 201)
+})
+
+app.delete('/v1/launcher/pin/:id', (c) => {
+  const id = c.req.param('id')
+  const initialLength = PINNED_ITEMS.length
+  PINNED_ITEMS = PINNED_ITEMS.filter(pin => pin.id !== id)
+
+  if (PINNED_ITEMS.length === initialLength) {
+    return c.json({ error: 'Pin not found' }, 404)
+  }
+
+  return c.json({ message: 'Pin deleted successfully' })
+})
+
+app.get('/v1/assets/icons', (c) => {
+  return c.json({
+    message: 'Asset endpoint will serve custom icons from R2 in production',
+    available_icons: 'coming soon'
+  })
+})
+
+export default app
