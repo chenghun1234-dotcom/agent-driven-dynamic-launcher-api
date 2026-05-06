@@ -67,6 +67,12 @@
 
     <div class="section">
         <h2>1. Intent 테스트</h2>
+        <div style="margin: 15px 0;">
+            <label style="font-size: 16px; cursor: pointer;">
+                <input type="checkbox" id="use-ai" style="width: 18px; height: 18px; vertical-align: middle;">
+                <span style="vertical-align: middle;">AI 사용하기 (Cloudflare Workers AI)</span>
+            </label>
+        </div>
         <p>아래 버튼을 클릭해 다양한 intent를 테스트해보세요:</p>
         <div id="intent-buttons">
             <button onclick="testIntent('내일 부산 출장 가')">출장</button>
@@ -107,10 +113,11 @@
 
         async function testIntent(intent) {
             try {
+                const useAi = document.getElementById('use-ai').checked;
                 const response = await fetch(`${API_BASE}/v1/launcher/compose`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_intent: intent })
+                    body: JSON.stringify({ user_intent: intent, use_ai: useAi })
                 });
                 const data = await response.json();
                 
