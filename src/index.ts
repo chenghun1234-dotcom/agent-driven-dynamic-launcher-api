@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { INTENT_TEMPLATES, DEFAULT_TEMPLATE, IntentTemplate, PinItem, getPinnedItems, addPinnedItem, removePinnedItem } from './icons'
+import { DEMO_HTML } from './demo'
 
 type Bindings = {
   ADDL_KV?: KVNamespace
@@ -12,10 +13,16 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.use('*', cors())
 
 app.get('/', (c) => {
+  return c.html(DEMO_HTML)
+})
+
+app.get('/api', (c) => {
   return c.json({
     name: 'Agent-Driven Dynamic Launcher (ADDL) UI API',
     version: '1.0.0',
     endpoints: [
+      'GET /',
+      'GET /api',
       'POST /v1/launcher/compose',
       'GET /v1/launcher/pins',
       'POST /v1/launcher/pin',
