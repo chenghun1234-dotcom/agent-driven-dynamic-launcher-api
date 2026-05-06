@@ -277,6 +277,138 @@ export const INTENT_TEMPLATES: IntentTemplate[] = [
         color: '#EF4444'
       }
     ]
+  },
+  {
+    layout_id: 'work_001',
+    expiry_hours: 10,
+    keywords: ['업무', 'work', '직장', '회사'],
+    icons: [
+      {
+        id: 'slack_001',
+        label: '슬랙',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/slack.svg',
+        action: 'https://slack.com',
+        type: 'app'
+      },
+      {
+        id: 'notion_002',
+        label: '업무 노트',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/notion.svg',
+        action: 'https://www.notion.so',
+        type: 'action'
+      },
+      {
+        id: 'googlecalendar_001',
+        label: '일정 확인',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/googlecalendar.svg',
+        action: 'https://calendar.google.com',
+        type: 'widget',
+        widget_data: {
+          type: 'calendar',
+          update_interval: 300,
+          preview: '오늘 2시 미팅'
+        }
+      }
+    ],
+    clusters: [
+      {
+        id: 'work_cluster_001',
+        label: '업무 도구',
+        icon_ids: ['slack_001', 'notion_002', 'googlecalendar_001'],
+        color: '#3B82F6'
+      }
+    ]
+  },
+  {
+    layout_id: 'music_001',
+    expiry_hours: 12,
+    keywords: ['음악', 'music', '노래', 'spotify'],
+    icons: [
+      {
+        id: 'spotify_001',
+        label: '스포티파이',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/spotify.svg',
+        action: 'https://www.spotify.com',
+        type: 'app'
+      },
+      {
+        id: 'youtube_001',
+        label: '유튜브 뮤직',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/youtubemusic.svg',
+        action: 'https://music.youtube.com',
+        type: 'app'
+      }
+    ]
+  },
+  {
+    layout_id: 'movie_001',
+    expiry_hours: 6,
+    keywords: ['영화', 'movie', '영화관', 'netflix'],
+    icons: [
+      {
+        id: 'netflix_001',
+        label: '넷플릭스',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/netflix.svg',
+        action: 'https://www.netflix.com',
+        type: 'app'
+      },
+      {
+        id: 'disney_001',
+        label: '디즈니+',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/disney.svg',
+        action: 'https://www.disneyplus.com',
+        type: 'app'
+      },
+      {
+        id: 'cgv_001',
+        label: 'CGV 예매',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/cgv.svg',
+        action: 'https://www.cgv.co.kr',
+        type: 'action'
+      }
+    ]
+  },
+  {
+    layout_id: 'finance_001',
+    expiry_hours: 8,
+    keywords: ['금융', 'finance', '은행', '주식'],
+    icons: [
+      {
+        id: 'kb_001',
+        label: 'KB국민은행',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/kookminbank.svg',
+        action: 'https://www.kbstar.com',
+        type: 'app'
+      },
+      {
+        id: 'kakao_001',
+        label: '카카오페이',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/kakaopay.svg',
+        action: 'https://www.kakaopay.com',
+        type: 'app'
+      }
+    ]
+  },
+  {
+    layout_id: 'cooking_001',
+    expiry_hours: 4,
+    keywords: ['요리', 'cooking', '레시피', 'recipe'],
+    icons: [
+      {
+        id: 'recipe10000recipe_001',
+        label: '만개의 레시피',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/10000recipe.svg',
+        action: 'https://www.10000recipe.com',
+        type: 'app'
+      },
+      {
+        id: 'youtube_002',
+        label: '요리 영상',
+        icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/youtube.svg',
+        action: 'https://www.youtube.com/results?search_query=요리',
+        type: 'action'
+      }
+    ]
   }
 ]
 
