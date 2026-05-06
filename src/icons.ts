@@ -190,5 +190,19 @@ export interface PinItem {
   created_at: string
 }
 
-export let PINNED_ITEMS: PinItem[] = []
+let pinnedItems: PinItem[] = []
+
+export function getPinnedItems(): PinItem[] {
+  return [...pinnedItems]
+}
+
+export function addPinnedItem(item: PinItem): void {
+  pinnedItems.push(item)
+}
+
+export function removePinnedItem(id: string): boolean {
+  const initialLength = pinnedItems.length
+  pinnedItems = pinnedItems.filter(pin => pin.id !== id)
+  return pinnedItems.length !== initialLength
+}
 

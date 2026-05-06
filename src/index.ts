@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { INTENT_TEMPLATES, DEFAULT_TEMPLATE, IntentTemplate, PINNED_ITEMS, PinItem } from './icons'
+import { INTENT_TEMPLATES, DEFAULT_TEMPLATE, IntentTemplate, PinItem, getPinnedItems, addPinnedItem, removePinnedItem } from './icons'
 
 type Bindings = {
   // ICON_ASSETS: R2Bucket
@@ -54,7 +54,7 @@ app.post('/v1/launcher/compose', async (c) => {
 
 app.get('/v1/launcher/pins', (c) => {
   return c.json({
-    pins: PINNED_ITEMS
+    pins: getPinnedItems()
   })
 })
 
@@ -74,16 +74,15 @@ app.post('/v1/launcher/pin', async (c) => {
     created_at: new Date().toISOString()
   }
 
-  PINNED_ITEMS.push(newPin)
+  addPinnedItem(newPin)
   return c.json({ pin: newPin }, 201)
 })
 
 app.delete('/v1/launcher/pin/:id', (c) => {
   const id = c.req.param('id')
-  const initialLength = PINNED_ITEMS.length
-  PINNED_ITEMS = PINNED_ITEMS.filter(pin => pin.id !== id)
+  const removed = removePinnedItem(id)
 
-  if (PINNED_ITEMS.length === initialLength) {
+  if (!removed) {
     return c.json({ error: 'Pin not found' }, 404)
   }
 
