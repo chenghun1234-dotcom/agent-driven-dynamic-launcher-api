@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>ADDL Demo Launcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .top-bar {
+            background: rgba(0,0,0,0.3);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .top-bar h1 {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .intent-input-container {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            max-width: 600px;
+            margin: 0 30px;
+        }
+        .intent-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+        }
+        .intent-button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            background: #FF6B6B;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .intent-button:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+        .ai-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-size: 14px;
+        }
+        .ai-toggle input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .launcher-area {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .clusters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .cluster {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            min-width: 280px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .cluster-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .icon-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        .icon-card img {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        .icon-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+        .icon-type {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .pins-area {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .pins-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .add-pin-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .add-pin-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .pins-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .pin-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 15px 12px;
+            text-align: center;
+            cursor: pointer;
+            min-width: 100px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .pin-card:hover {
+            transform: translateY(-3px);
+        }
+        .pin-card img {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 8px;
+        }
+        .pin-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        .delete-pin {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .pin-card:hover .delete-pin {
+            opacity: 1;
+        }
+        .expiry-info {
+            color: white;
+            font-size: 14px;
+            background: rgba(0,0,0,0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+        .modal-input:focus {
+            border-color: #667eea;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .modal-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .modal-btn.cancel {
+            background: #ddd;
+            color: #333;
+        }
+        .modal-btn.save {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <h1>🚀 ADDL Demo Launcher</h1>
+        <div class="intent-input-container">
+            <input type="text" id="intentInput" class="intent-input" placeholder="무엇을 도와드릴까요? (예: 내일 부산 출장 가)">
+            <button class="intent-button" onclick="handleIntent()">✨ 생성하기</button>
+        </div>
+        <label class="ai-toggle">
+            <input type="checkbox" id="useAi">
+            <span>AI 사용</span>
+        </label>
+    </div>
+
+    <div class="launcher-area">
+        <div id="expiryInfo" class="expiry-info" style="display: none;"></div>
+        
+        <div id="clustersContainer" class="clusters-container"></div>
+
+        <div class="pins-area">
+            <div class="pins-title">
+                📌 고정된 아이템
+                <button class="add-pin-btn" onclick="openPinModal()">+ Pin 추가</button>
+            </div>
+            <div id="pinsGrid" class="pins-grid"></div>
+        </div>
+    </div>
+
+    <div id="pinModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Pin 추가하기</h2>
+            <input type="text" id="pinLabel" class="modal-input" placeholder="레이블 (예: 중요 문서)">
+            <input type="text" id="pinIconUrl" class="modal-input" placeholder="아이콘 URL">
+            <input type="text" id="pinAction" class="modal-input" placeholder="액션 (URL)">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closePinModal()">취소</button>
+                <button class="modal-btn save" onclick="savePin()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://agent-driven-dynamic-launcher-api.chenghun1234.workers.dev';
+        let currentIcons = [];
+        let currentExpiry = null;
+
+        async function handleIntent() {
+            const intent = document.getElementById('intentInput').value;
+            const useAi = document.getElementById('useAi').checked;
+            if (!intent.trim()) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/launcher/compose`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_intent: intent, use_ai: useAi })
+                });
+                const data = await response.json();
+                renderClusters(data);
+            } catch (err) {
+                alert('Error: ' + err);
+            }
+        }
+
+        function renderClusters(data) {
+            currentIcons = data.icons;
+            currentExpiry = data.expiry;
+            const container = document.getElementById('clustersContainer');
+            const expiryInfo = document.getElementById('expiryInfo');
+
+            if (data.expiry) {
+                const expiryDate = new Date(data.expiry);
+                expiryInfo.textContent = `⏰ 유효시간: ${expiryDate.toLocaleString('ko-KR')}`;
+                expiryInfo.style.display = 'inline-block';
+            }
+
+            container.innerHTML = '';
+            if (data.clusters && data.clusters.length > 0) {
+                data.clusters.forEach(cluster => {
+                    const clusterDiv = document.createElement('div');
+                    clusterDiv.className = 'cluster';
+                    clusterDiv.style.borderColor = cluster.color || 'rgba(255,255,255,0.2)';
+                    
+                    clusterDiv.innerHTML = `<div class="cluster-title">📂 ${cluster.label}</div>`;
+                    const iconsGrid = document.createElement('div');
+                    iconsGrid.className = 'icons-grid';
+                    
+                    cluster.icon_ids.forEach(iconId => {
+                        const icon = data.icons.find(i => i.id === iconId);
+                        if (icon) {
+                            iconsGrid.appendChild(createIconCard(icon));
+                        }
+                    });
+                    clusterDiv.appendChild(iconsGrid);
+                    container.appendChild(clusterDiv);
+                });
+            } else {
+                const clusterDiv = document.createElement('div');
+                clusterDiv.className = 'cluster';
+                clusterDiv.innerHTML = `<div class="cluster-title">📱 추천 아이콘</div>`;
+                const iconsGrid = document.createElement('div');
+                iconsGrid.className = 'icons-grid';
+                
+                data.icons.forEach(icon => {
+                    iconsGrid.appendChild(createIconCard(icon));
+                });
+                clusterDiv.appendChild(iconsGrid);
+                container.appendChild(clusterDiv);
+            }
+        }
+
+        function createIconCard(icon) {
+            const card = document.createElement('div');
+            card.className = 'icon-card';
+            card.innerHTML = `
+                <img src="${icon.icon_url}" alt="${icon.label}" onerror="this.src='https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/questionmark.svg'">
+                <div class="icon-label">${icon.label}</div>
+                <div class="icon-type">${icon.type}</div>
+            `;
+            card.onclick = () => {
+                if (icon.action) {
+                    window.open(icon.action, '_blank');
+                }
+            };
+            return card;
+        }
+
+        async function loadPins() {
+            try {
+                const response = await fetch(`${API_BASE}/v1/launcher/pins`);
+                const data = await response.json();
+                renderPins(data.pins);
+            } catch (err) {
+                console.error('Failed to load pins:', err);
+            }
+        }
+
+        function renderPins(pins) {
+            const grid = document.getElementById('pinsGrid');
+            grid.innerHTML = '';
+            if (!pins || pins.length === 0) {
+                grid.innerHTML = '<div style="color: white; opacity: 0.7;">고정된 아이템이 없습니다</div>';
+                return;
+            }
+            pins.forEach(pin => {
+                const card = document.createElement('div');
+                card.className = 'pin-card';
+                card.innerHTML = `
+                    <button class="delete-pin" onclick="deletePin('${pin.id}')">×</button>
+                    <img src="${pin.icon_url}" alt="${pin.label}" onerror="this.src='https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/questionmark.svg'">
+                    <div class="pin-label">${pin.label}</div>
+                `;
+                card.onclick = (e) => {
+                    if (!e.target.classList.contains('delete-pin')) {
+                        window.open(pin.action, '_blank');
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        function openPinModal() {
+            document.getElementById('pinModal').classList.add('show');
+        }
+
+        function closePinModal() {
+            document.getElementById('pinModal').classList.remove('show');
+            document.getElementById('pinLabel').value = '';
+            document.getElementById('pinIconUrl').value = '';
+            document.getElementById('pinAction').value = '';
+        }
+
+        async function savePin() {
+            const label = document.getElementById('pinLabel').value;
+            const icon_url = document.getElementById('pinIconUrl').value;
+            const action = document.getElementById('pinAction').value;
+
+            if (!label || !icon_url || !action) {
+                alert('모든 필드를 입력해주세요');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/launcher/pin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ label, icon_url, action })
+                });
+                await response.json();
+                closePinModal();
+                loadPins();
+            } catch (err) {
+                alert('Error saving pin: ' + err);
+            }
+        }
+
+        async function deletePin(id) {
+            try {
+                await fetch(`${API_BASE}/v1/launcher/pin/${id}`, { method: 'DELETE' });
+                loadPins();
+            } catch (err) {
+                alert('Error deleting pin: ' + err);
+            }
+        }
+
+        document.getElementById('intentInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleIntent();
+            }
+        });
+
+        loadPins();
+    </script>
+</body>
+</html>
