@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>ADDL API 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        button {
+            padding: 10px 18px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #282c34;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .icon-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .icon-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            width: 120px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .icon-card img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ADDL UI API 테스트</h1>
+
+    <div class="section">
+        <h2>1. Intent 테스트</h2>
+        <p>아래 버튼을 클릭해 다양한 intent를 테스트해보세요:</p>
+        <div id="intent-buttons">
+            <button onclick="testIntent('내일 부산 출장 가')">출장</button>
+            <button onclick="testIntent('배달 음식 시키자')">배달</button>
+            <button onclick="testIntent('운동 하러 가자')">운동</button>
+            <button onclick="testIntent('팀장님께 보고하기')">보고</button>
+            <button onclick="testIntent('오늘 공부해야지')">학습</button>
+            <button onclick="testIntent('쇼핑 하러 가자')">쇼핑</button>
+            <button onclick="testIntent('게임 하고 싶어')">게임</button>
+            <button onclick="testIntent('업무 시작하자')">업무</button>
+            <button onclick="testIntent('음악 듣자')">음악</button>
+            <button onclick="testIntent('영화 보러 가자')">영화</button>
+            <button onclick="testIntent('은행 가야해')">금융</button>
+            <button onclick="testIntent('요리 할 거야')">요리</button>
+        </div>
+        <h3>결과:</h3>
+        <div id="compose-result"></div>
+        <h3>아이콘 미리보기:</h3>
+        <div id="icon-preview" class="icon-preview"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Pin 관리 테스트</h2>
+        <button onclick="addPin()">Pin 추가</button>
+        <button onclick="getPins()">Pins 조회</button>
+        <h3>결과:</h3>
+        <pre id="pin-result"></pre>
+    </div>
+
+    <div class="section">
+        <h2>3. 기본 정보</h2>
+        <button onclick="getInfo()">API 정보 조회</button>
+        <pre id="info-result"></pre>
+    </div>
+
+    <script>
+        const API_BASE = 'https://agent-driven-dynamic-launcher-api.chenghun1234.workers.dev';
+
+        async function testIntent(intent) {
+            try {
+                const response = await fetch(`${API_BASE}/v1/launcher/compose`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_intent: intent })
+                });
+                const data = await response.json();
+                
+                document.getElementById('compose-result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                const previewDiv = document.getElementById('icon-preview');
+                previewDiv.innerHTML = '';
+                data.icons.forEach(icon => {
+                    const card = document.createElement('div');
+                    card.className = 'icon-card';
+                    card.innerHTML = `
+                        <img src="${icon.icon_url}" alt="${icon.label}" onerror="this.src='https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/questionmark.svg'">
+                        <div style="font-size: 12px; font-weight: bold;">${icon.label}</div>
+                        <div style="font-size: 10px; color: #666;">${icon.type}</div>
+                    `;
+                    previewDiv.appendChild(card);
+                });
+            } catch (err) {
+                document.getElementById('compose-result').innerHTML = `<pre style="color: red;">Error: ${err}</pre>`;
+            }
+        }
+
+        async function addPin() {
+            const pin = {
+                label: '테스트 문서',
+                icon_url: 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/googledrive.svg',
+                action: 'https://drive.google.com'
+            };
+            try {
+                const response = await fetch(`${API_BASE}/v1/launcher/pin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(pin)
+                });
+                const data = await response.json();
+                document.getElementById('pin-result').textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById('pin-result').textContent = `Error: ${err}`;
+            }
+        }
+
+        async function getPins() {
+            try {
+                const response = await fetch(`${API_BASE}/v1/launcher/pins`);
+                const data = await response.json();
+                document.getElementById('pin-result').textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById('pin-result').textContent = `Error: ${err}`;
+            }
+        }
+
+        async function getInfo() {
+            try {
+                const response = await fetch(API_BASE);
+                const data = await response.json();
+                document.getElementById('info-result').textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById('info-result').textContent = `Error: ${err}`;
+            }
+        }
+    </script>
+</body>
+</html>
